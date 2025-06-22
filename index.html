@@ -1,4 +1,49 @@
-<!DOCTYPE html>
+<script>
+  const btn = document.getElementById("refreshBtn");
+  const codeDisplay = document.getElementById("codeDisplay");
+  const statusEl = document.getElementById("status");
+
+  let autoRefreshInterval;
+  
+  // Point this to your Worker URL
+  const WORKER_URL = "https://roblox-verifier.everybodyhatescowlover4499.workers.dev";
+  
+  async function fetchCode() {
+    try {
+      statusEl.textContent = "Fetching code...";
+      const res = await fetch(`${WORKER_URL}/api/get-code`);
+      const data = await res.json();
+      
+      if (data.code) {
+        codeDisplay.textContent = data.code;
+        statusEl.textContent = "Last updated: " + new Date().toLocaleTimeString();
+      } else {
+        codeDisplay.textContent = "No active code";
+        statusEl.textContent = "No valid code found";
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      codeDisplay.textContent = "Connection error";
+      statusEl.textContent = "Failed to fetch code";
+    }
+  }
+
+  function startAutoRefresh() {
+    autoRefreshInterval = setInterval(fetchCode, 10000);
+  }
+
+  btn.onclick = async () => {
+    btn.disabled = true;
+    btn.innerText = "Refreshing...";
+    await fetchCode();
+    btn.disabled = false;
+    btn.innerText = "Refresh Code";
+  };
+
+  // Initial load
+  fetchCode();
+  startAutoRefresh();
+</script><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
