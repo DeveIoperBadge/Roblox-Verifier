@@ -1,1 +1,22 @@
-
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Roblox Code</title>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 50px; }
+    #code { font-size: 3rem; color: #0066ff; }
+  </style>
+</head>
+<body>
+  <h1>Current Code:</h1>
+  <div id="code">NO_CODE</div>
+  <script>
+    // Fetch from a free API (e.g., JSONBin, Pastebin, or GitHub Gist)
+    fetch('https://api.jsonbin.io/v3/b/[YOUR_BIN_ID]')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('code').textContent = data.code || "ERROR";
+      });
+  </script>
+</body>
+</html>
