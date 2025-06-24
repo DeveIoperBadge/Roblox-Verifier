@@ -1,112 +1,60 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Roblox Code Verifier</title>
+  <title>Roblox Code Display</title>
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #0052cc, #3399ff);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      font-family: Arial, sans-serif;
       text-align: center;
       padding: 20px;
     }
-
-    .container {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      padding: 2rem;
-      border-radius: 10px;
-      max-width: 500px;
-      width: 100%;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    }
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
-
     #codeDisplay {
-      font-size: 2.5rem;
-      font-weight: bold;
-      letter-spacing: 2px;
-      background: rgba(0, 0, 0, 0.2);
-      padding: 1rem;
-      border-radius: 6px;
-      margin: 1.5rem 0;
-    }
-
-    button {
-      background-color: white;
-      color: #0052cc;
-      border: none;
-      padding: 0.75rem 1.5rem;
+      font-size: 24px;
+      margin: 20px;
+      padding: 20px;
+      background: #f0f0f0;
       border-radius: 5px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #003d99;
-      color: white;
-    }
-
-    #status {
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      opacity: 0.85;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Verification Code</h1>
-    <div id="codeDisplay">Loading...</div>
-    <button id="refreshBtn">Refresh Code</button>
-    <div id="status"></div>
-  </div>
+  <h1>Current Verification Code</h1>
+  <div id="codeDisplay">Loading code...</div>
+  <div id="status"></div>
 
   <script>
-    const btn = document.getElementById('refreshBtn');
-    const codeDisplay = document.getElementById('codeDisplay');
-    const statusEl = document.getElementById('status');
+    const WORKER_URL = "https://roblox-verifier.your-worker-subdomain.workers.dev";
+    const codeDisplay = document.getElementById("codeDisplay");
+    const statusEl = document.getElementById("status");
 
     async function fetchCode() {
       try {
-        statusEl.textContent = 'Fetching code...';
-        const response = await fetch('/api/get-code');
-        if (!response.ok) throw new Error('Failed to fetch code');
-
+        statusEl.textContent = "Fetching code...";
+        const response = await fetch(`${WORKER_URL}/api/get-code`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
-        codeDisplay.textContent = data.code || 'No code available';
-        statusEl.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+        
+        if (data.code) {
+          codeDisplay.textContent = data.code;
+          statusEl.textContent = "Last updated: " + new Date().toLocaleTimeString();
+        } else {
+          codeDisplay.textContent = "No active code";
+          statusEl.textContent = "No code available";
+        }
       } catch (error) {
-        console.error('Error:', error);
-        codeDisplay.textContent = 'Error loading code';
-        statusEl.textContent = 'Failed to connect to server';
+        console.error("Error:", error);
+        codeDisplay.textContent = "Error loading code";
+        statusEl.textContent = "Failed to connect to server";
       }
     }
 
-    btn.addEventListener('click', async () => {
-      btn.disabled = true;
-      btn.textContent = 'Refreshing...';
-      await fetchCode();
-      btn.disabled = false;
-      btn.textContent = 'Refresh Code';
-    });
-
+    // Fetch immediately and then every 10 seconds
     fetchCode();
-    setInterval(fetchCode, 10000); // Auto-refresh every 10 sec
+    setInterval(fetchCode, 10000);
   </script>
 </body>
 </html>
